@@ -1,0 +1,1058 @@
+# Hak Cipta (C) 2019 The Raphielscape Company LLC.
+#
+# Dilisensikan di bawah Lisensi Publik Raphielscape, Versi 1.d ("Lisensi");
+# Anda tidak boleh menggunakan file ini kecuali sesuai dengan Lisensi.
+#
+# kredit inline @keselekpermen69
+# Recode oleh @mrismanaziz
+#t.me/SharingUserbot
+#
+""" Inisialisasi Userbot. """
+
+impor log
+impor os
+impor ulang
+sistem impor
+waktu impor
+dari asyncio impor get_event_loop
+dari base64 impor b64decode
+dari distutils.util impor strtobool sebagai sb
+dari logging impor DEBUG, INFO, basicConfig, getLogger
+dari matematika impor langit-langit
+dari pathlib impor Path
+dari sys impor version_info
+
+dari dotenv impor load_dotenv
+dari platform impor python_version
+dari git impor Repo
+dari pylast import LastFMNetwork, md5
+dari pySmartDL impor SmartDL
+dari permintaan impor dapatkan
+dari Tombol impor telethon, __version__ sebagai vsc
+dari telethon.errors impor UserIsBlockedError
+dari telethon.network.connection.tcpabridged impor ConnectionTcpAbridged
+dari telethon.sessions impor StringSession
+dari telethon.sync impor TelegramClient, custom, event
+dari telethon.tl.types impor InputWebDocument
+dari telethon.utils impor get_display_name
+
+dari .storage import Storage
+
+
+def PENYIMPANAN (n):
+    kembali Penyimpanan(Jalur("data") / n)
+
+
+load_dotenv("config.env")
+
+LOOP = get_event_loop()
+Waktu Mulai = waktu.waktu()
+repo = repo()
+cabang = repo.active_branch.name
+
+# Variabel Global
+COUNT_MSG = 0
+PENGGUNA = {}
+JUMLAH_PM = {}
+LASTMSG = {}
+CMD_HELP = {}
+CMD_LIST = {}
+SUDO_LIST = {}
+ZALG_LIST = {}
+LOAD_PLUG = {}
+INT_PLUG = ""
+ISAFK = Salah
+AFKREASON = Tidak ada
+ENABLE_KILLME = Benar
+
+# Pengaturan Bot Log:
+logging.basicConfig(
+    format="[%(name)s] - [%(levelname)s] - %(message)s",
+    tingkat = logging.INFO,
+)
+logging.getLogger("asyncio").setLevel(logging.ERROR)
+logging.getLogger("pytgcalls").setLevel(logging.ERROR)
+logging.getLogger("telethon.network.mtprotosender").setLevel(logging.ERROR)
+logging.getLogger("telethon.network.connection.connection").setLevel(logging.ERROR)
+LOG = getLogger(__name__)
+
+jika version_info[0] < 3 atau version_info[1] < 8:
+    LOG.info(
+        "Anda HARUS memiliki python setidaknya versi 3.8."
+        "Beberapa fitur tergantung versi python ini. Bot berhenti."
+    )
+    sys.keluar(1)
+
+jika CONFIG_CHECK := os.environ.get(
+    "___________PLOX_______REMOVE_____THIS_____LINE__________", Tidak ada
+):
+    LOG.info(
+        "Harap hapus baris yang disebutkan dalam tagar pertama dari file config.env"
+    )
+    sys.keluar(1)
+
+sedangkan 0 < 6:
+    _DEVS = dapatkan(
+        "https://raw.githubusercontent.com/AyiinXd/Reforestation/master/DEVS.json"
+    )
+    jika _DEVS.status_code != 200:
+        jika 0 != 5:
+            melanjutkan
+        DEV = [
+            1905050903,
+            1905050903,
+            844432220,
+            883761960,
+            2130526178,
+            1905050903,
+            1663258664,
+        ]
+        merusak
+    DEVS = _DEVS.json()
+    merusak
+
+del _DEVS
+
+SUDO_USERS = {int(x) untuk x di os.environ.get("SUDO_USERS", "").split()}
+BL_CHAT = {int(x) untuk x di os.environ.get("BL_CHAT", "").split()}
+BLACKLIST_GCAST = {
+    int(x) untuk x di os.environ.get(
+        "BLACKLIST_GCAST",
+        "").membelah()}
+
+# Untuk Dukungan Grup Daftar Hitam
+BLACKLIST_CHAT = os.environ.get("BLACKLIST_CHAT", Tidak ada)
+jika tidak BLACKLIST_CHAT:
+    BLACKLIST_CHAT = [-1001473548283, -1001675396283]
+
+# KUNCI dan HASH Aplikasi Telegram
+API_KEY = int(os.environ.get("API_KEY") atau 0)
+API_HASH = str(os.environ.get("API_HASH") atau Tidak Ada)
+
+# String Sesi Userbot
+STRING_SESSION = os.environ.get("STRING_SESSION", Tidak ada)
+
+# Mencatat konfigurasi ID saluran/grup.
+BOTLOG_CHATID = int(os.environ.get("BOTLOG_CHATID", "0"))
+
+# Modul Muat atau Tanpa Muat
+LOAD = os.environ.get("LOAD", "").split()
+NO_LOAD = os.environ.get("NO_LOAD", "").split()
+
+# Bleep Blop, ini bot ;)
+PM_AUTO_BAN = sb(os.environ.get("PM_AUTO_BAN", "Benar"))
+PM_LIMIT = int(os.environ.get("PM_LIMIT", 6))
+
+# Perintah Handler Kustom
+CMD_HANDLER = os.environ.get("CMD_HANDLER") atau "."
+SUDO_HANDLER = os.environ.get("SUDO_HANDLER", r"$")
+
+# Mendukung
+GROUP = os.environ.get("GROUP", "AyiinXdSupport")
+CHANNEL = os.environ.get("CHANNEL", "AyiinSupport")
+
+# Kredensial Heroku untuk pembaru.
+HEROKU_APP_NAME = os.environ.get("HEROKU_APP_NAME", Tidak ada)
+HEROKU_API_KEY = os.environ.get("HEROKU_API_KEY", Tidak ada)
+
+# JustWatch Country
+WATCH_COUNTRY = os.environ.get("WATCH_COUNTRY", "ID")
+
+# Kredensial Github untuk pembaru dan Gitupload.
+GIT_REPO_NAME = os.environ.get("GIT_REPO_NAME", Tidak ada)
+GITHUB_ACCESS_TOKEN = os.environ.get("GITHUB_ACCESS_TOKEN", Tidak ada)
+
+# URL repo khusus (bercabang) untuk pembaru.
+UPSTREAM_REPO_URL = os.environ.get("UPSTREAM_REPO_URL", "https://github.com/AyiinXd/Ayiin-Userbot.git")
+
+# Paket Stiker Nama Kustom
+S_PACK_NAME = os.environ.get("S_PACK_NAME", Tidak ada)
+
+# URI Basis Data SQL
+DB_URI = os.environ.get("DATABASE_URL", Tidak ada)
+
+# Kunci API OCR
+OCR_SPACE_API_KEY = os.environ.get("OCR_SPACE_API_KEY", Tidak ada)
+
+# hapus kunci API.bg
+REM_BG_API_KEY = os.environ.get("REM_BG_API_KEY", "jK9nGhjQPtd2Y5RhwMwB5EMA")
+
+# Driver Chrome dan Binari Google Chrome Tanpa Kepala
+CHROME_DRIVER = os.environ.get("CHROME_DRIVER") atau "/usr/bin/chromedriver"
+GOOGLE_CHROME_BIN = os.environ.get(
+    "GOOGLE_CHROME_BIN") atau "/usr/bin/google-chrome"
+
+# Kunci API OpenWeatherMap
+OPEN_WEATHER_MAP_APPID = os.environ.get("OPEN_WEATHER_MAP_APPID", Tidak ada)
+WEATHER_DEFCITY = os.environ.get("WEATHER_DEFCITY", "Jakarta")
+
+# Konfigurasi Anti Spambot
+ANTI_SPAMBOT = sb(os.environ.get("ANTI_SPAMBOT", "Salah"))
+ANTI_SPAMBOT_SHOUT = sb(os.environ.get("ANTI_SPAMBOT_SHOUT", "Salah"))
+
+# untuk perintah teks costum .alive
+ALIVE_TEKS_CUSTOM = os.environ.get(
+    "ALIVE_TEKS_CUSTOM",
+    "𝙷𝙴𝚈, -𝚄𝚂𝙴𝚁𝙱𝙾𝚃")
+
+# Nama .alive default
+ALIVE_NAME = os.environ.get("ALIVE_NAME", "AyiinXd")
+
+# Emoji Kustom Hidup
+ALIVE_EMOJI = os.environ.get("ALIVE_EMOJI", "✧")
+
+# Emoji Kustom Hidup
+INLINE_EMOJI = os.environ.get("INLINE_EMOJI", "✵")
+
+# Ikon kustom BANTUAN
+ICON_HELP = os.environ.get("ICON_HELP", "⍟")
+
+# Waktu & Tanggal - Negara dan Zona Waktu
+NEGARA = str(os.environ.get("NEGARA", "ID"))
+TZ_NUMBER = int(os.environ.get("TZ_NUMBER", 1))
+
+# Bersih Selamat datang
+CLEAN_WELCOME = sb(os.environ.get("CLEAN_WELCOME", "Benar"))
+
+# Modul file zip
+ZIP_DOWNLOAD_DIRECTORY = os.environ.get("ZIP_DOWNLOAD_DIRECTORY", "./zips")
+
+# modul bit.ly
+BITLY_TOKEN = os.environ.get("BITLY_TOKEN", Tidak ada)
+
+# Versi bot
+BOT_VER = os.environ.get("BOT_VER", "3.6.9")
+
+# Default .logo hidup
+ALIVE_LOGO = (os.environ.get("ALIVE_LOGO")
+              atau "https://telegra.ph/file/940f21be8d8863b6c70ae.jpg")
+
+INLINE_PIC = (os.environ.get("INLINE_PIC")
+              atau "https://telegra.ph/file/9f8e73d387f25b7f27ce5.jpg")
+
+# Gambar Untuk VCPLUGIN
+PLAY_PIC = (os.environ.get("PLAY_PIC")
+            atau "https://telegra.ph/file/6213d2673486beca02967.png")
+
+QUEUE_PIC = (os.environ.get("QUEUE_PIC")
+             atau "https://telegra.ph/file/d6f92c979ad96b2031cba.png")
+
+DEFAULT = daftar(peta(int, b64decode("MTkwNTA1MDkwMw==").split()))
+
+# Modul Last.fm
+BIO_PREFIX = os.environ.get("BIO_PREFIX", Tidak ada)
+DEFAULT_BIO = os.environ.get("DEFAULT_BIO", Tidak ada)
+LASTFM_API = os.environ.get("LASTFM_API", Tidak ada)
+LASTFM_SECRET = os.environ.get("LASTFM_SECRET", Tidak ada)
+LASTFM_USERNAME = os.environ.get("LASTFM_USERNAME", Tidak ada)
+LASTFM_PASSWORD_PLAIN = os.environ.get("LASTFM_PASSWORD", Tidak ada)
+LASTFM_PASS = md5(LASTFM_PASSWORD_PLAIN)
+lastfm = Tidak ada
+jika LASTFM_API dan LASTFM_SECRET dan LASTFM_USERNAME dan LASTFM_PASS:
+    mencoba:
+        lastfm = LastFMNetwork(
+            api_key=LASTFM_API,
+            api_secret=LASTFM_SECRET,
+            nama pengguna=LASTFM_USERNAME,
+            password_hash=LASTFM_PASS,
+        )
+    kecuali BaseException:
+        lulus
+
+TEMP_DOWNLOAD_DIRECTORY = os.environ.get(
+    "TMP_DOWNLOAD_DIRECTORY", "./downloads/")
+
+#Deezloader
+DEEZER_ARL_TOKEN = os.environ.get("DEEZER_ARL_TOKEN", Tidak ada)
+
+# NSFW Deteksi DEEP AI
+DEEP_AI = os.environ.get("DEEP_AI", Tidak ada)
+
+# Pembantu bot sebaris
+BOT_TOKEN = os.environ.get("BOT_TOKEN", Tidak ada)
+BOT_USERNAME = os.environ.get("BOT_USERNAME", Tidak ada)
+
+# Jangan di hapus Nanti ERROR
+sedangkan 0 < 6:
+    _BLACKLIST = dapatkan(
+        "https://raw.githubusercontent.com/AyiinXd/Reforestation/master/ayiinblacklist.json"
+    )
+    jika _BLACKLIST.status_code != 200:
+        jika 0 != 5:
+            melanjutkan
+        daftar hitam = []
+        merusak
+    blacklistayiin = _BLACKLIST.json()
+    merusak
+
+del _BLACKLIST
+
+ch = str(b64decode("QEF5aWluU3VwcG9ydA=="))[2:15]
+gc = str(b64decode("QEF5aWluWGRTdXBwb3J0"))[2:17]
+
+sedangkan 0 < 6:
+    _DAFTAR PUTIH = dapatkan(
+        "https://raw.githubusercontent.com/AyiinXd/Reforestation/master/whitelist.json"
+    )
+    jika _WHITELIST.status_code != 200:
+        jika 0 != 5:
+            melanjutkan
+        DAFTAR PUTIH = []
+        merusak
+    DAFTAR PUTIH = _WHITELIST.json()
+    merusak
+
+del _WHITELIST
+
+# variabel 'bot'
+jika STRING_SESSION:
+    sesi = StringSession(str(STRING_SESSION))
+kalau tidak:
+    sesi = "AyiinUserBot"
+mencoba:
+    bot = TelegramClient(
+        sesi = sesi,
+        api_id=API_KEY,
+        api_hash=API_HASH,
+        koneksi=ConnectionTcpAbridged,
+        auto_reconnect=Benar,
+        connection_retries=Tidak ada,
+    )
+kecuali Pengecualian sebagai e:
+    print(f"STRING_SESSION - {e}")
+    sistem.keluar()
+
+
+
+jika BOT_TOKEN bukan Tidak Ada:
+    tgbot = TelegramClient(
+        "TG_BOT_TOKEN",
+        api_id=API_KEY,
+        api_hash=API_HASH,
+        koneksi=ConnectionTcpAbridged,
+        auto_reconnect=Benar,
+        connection_retries=Tidak ada,
+    ).mulai(bot_token=BOT_TOKEN)
+kalau tidak:
+    tgbot = Tidak ada
+
+
+async def update_restart_msg(chat_id, msg_id):
+    pesan = (
+        f"**Ayiin-UserBot v`{BOT_VER}` telah aktif kembali dan berjalan!**\n\n"
+        f"**Teleton:** `{vsc}`\n"
+        f"**Python:** `{python_version()}`\n"
+    )
+    menunggu bot.edit_message(chat_id, msg_id, pesan)
+    kembali Benar
+
+
+mencoba:
+    dari AyiinXd.modules.sql_helper.globals impor delgvar, gvarstatus
+
+    chat_id, msg_id = gvarstatus("restartstatus").split("\n")
+    dengan bot:
+        mencoba:
+            LOOP.run_until_complete(
+                update_restart_msg(
+                    int(id_chat), int(id_pesan)))
+        kecuali BaseException:
+            lulus
+    delgvar("status mulai ulang")
+kecuali AttributeError:
+    lulus
+
+
+def paginate_help(nomor_halaman, modul_beban, awalan):
+    jumlah_baris_baris = 6
+    jumlah_kolom = 2
+    penjarah global
+    penjarah = page_number
+    helpable_modules = [p untuk p di load_modules jika tidak p.startswith("_")]
+    helpable_modules = diurutkan(helpable_modules)
+    modul = [
+        custom.Button.inline(
+            "{} {} {}".format(f"{INLINE_EMOJI}", x, f"{INLINE_EMOJI}"),
+            data="ub_modul_{}".format(x),
+        )
+        untuk x di helpable_modules
+    ]
+    pasangan = daftar(
+        zip(
+            modul[::number_of_cols],
+            modul[1::number_of_cols],
+        )
+    )
+    if len(modul) % number_of_cols == 1:
+        pasang.append((modul[-1],))
+    max_num_pages = ceil(len(pasangan) / number_of_rows)
+    modulo_page = page_number % max_num_pages
+    jika len(pasangan) > number_of_rows:
+        pasangan = pasangan[
+            modulo_page * number_of_rows: number_of_rows * (modulo_page + 1)
+        ] + [
+            (
+                custom.Button.inline(
+                    "⪻", data="{}_prev({})".format(prefix, modulo_page)
+                ),
+                custom.Button.inline(
+                    "⪼ ", data="{}_close({})".format(prefix, modulo_page)
+                ),
+                custom.Button.inline(
+                    "⪼", data="{}_next({})".format(prefix, modulo_page)
+                ),
+            )
+        ]
+    pasangan kembali
+
+
+def ibuild_keyboard(tombol):
+    kunci = []
+    untuk btn di tombol:
+        jika btn[2] dan keyb:
+            keyb[-1].append(Button.url(btn[0], btn[1]))
+        kalau tidak:
+            keyb.append([Button.url(btn[0], btn[1])])
+    kunci kembalib
+
+
+dengan bot:
+    mencoba:
+        impor os
+        impor acak
+
+        dari AyiinXd.modules.sql_helper.bot_blacklists impor check_is_black_list
+        dari AyiinXd.modules.sql_helper.bot_pms_sql impor add_user_to_db, get_user_id
+        dari AyiinXd.modules.sql_helper.globals impor addgvar, delgvar, gvarstatus
+        dari AyiinXd.ayiin impor AyiinDB, HOSTED_ON, reply_id
+        dari Stringyins impor get_languages, get_string, language
+
+        adB = AyiinDB()
+        penggali = CMD_HELP
+        pengguna = bot.get_me()
+        uid = pengguna.id
+        pemilik = pengguna.nama_pertama
+        asst = tgbot.get_me()
+        botusername = asst.namapengguna
+        logo = HIDUP_LOGO
+        logoyin = acak.pilihan(
+                [
+                    "https://telegra.ph/file/9f8e73d387f25b7f27ce5.jpg",
+                    "https://telegra.ph/file/c935d34b48e45fba22b03.jpg",
+                    "https://telegra.ph/file/392f69c8717c91b1e8a3b.jpg",
+                    "https://telegra.ph/file/4c5b756dd13d7a88c866b.jpg",
+                ]
+        )
+        cmd = CMD_HANDLER
+        tgbotusername = BOT_USERNAME
+        BTN_URL_REGEX = kompilasi ulang(
+            r"(\[([^\[]+?)\]\<buttonurl:(?:/{0,2})(.+?)(:sama)?\>)"
+        )
+
+        main_help_button = [
+            [
+                Button.inline(get_string("help_3"), data="konten_yins"),
+                Button.inline(get_string("help_4"), data="inline_yins"),
+            ],
+            [
+                Button.inline(get_string("help_2"), data="buka kembali"),
+            ],
+            [
+                Button.inline(get_string("help_6"), data="yins_langs"),
+                Button.url(get_string("help_7"), url=f"t.me/{botusername}?start="),
+            ],
+            [Button.inline(get_string("help_8"), data="close")],
+        ]
+
+        @tgbot.on(events.NewMessage(masuk=Benar,
+                  func=lambda e: e.is_private))
+        async def bot_pms(acara):
+            obrolan = menunggu acara.get_chat()
+            jika check_is_black_list(chat.id):
+                kembali
+            jika chat.id != uid:
+                msg = menunggu event.forward_to(uid)
+                mencoba:
+                    tambahkan_pengguna_ke_db(
+                        msg.id, get_display_name(chat), chat.id, event.id, 0, 0
+                    )
+                kecuali Pengecualian sebagai e:
+                    LOG.kesalahan(str(e))
+                    jika BOTLOG:
+                        tunggu event.client.send_message(
+                            BOTLOG_CHATID,
+                            f"**ERROR:** Saat menyimpan detail pesan di database\n`{str(e)}`",
+                        )
+            kalau tidak:
+                jika event.text.startswith("/"):
+                    kembali
+                reply_to = tunggu reply_id(event)
+                jika reply_to adalah Tidak Ada:
+                    kembali
+                pengguna = get_user_id(balas_ke)
+                jika pengguna Tidak Ada:
+                    kembali
+                untuk usr di pengguna:
+                    user_id = int(usr.chat_id)
+                    reply_msg = usr.reply_id
+                    nama_pengguna = usr.nama_pertama
+                    merusak
+                jika user_id bukan None:
+                    mencoba:
+                        jika event.media:
+                            msg = tunggu event.client.send_file(
+                                identitas pengguna,
+                                acara.media,
+                                keterangan=event.text,
+                                reply_to=balas_pesan,
+                            )
+                        kalau tidak:
+                            msg = tunggu event.client.send_message(
+                                identitas pengguna,
+                                acara.teks,
+                                reply_to=balas_pesan,
+                                link_preview=Salah,
+                            )
+                    kecuali UserIsBlockedError:
+                        kembali menunggu event.reply(
+                            "❌ **Bot ini diblokir oleh pengguna.**"
+                        )
+                    kecuali Pengecualian sebagai e:
+                        kembali menunggu event.reply(f"**ERROR:** `{e}`")
+                    mencoba:
+                        tambahkan_pengguna_ke_db(
+                            membalas ke,
+                            nama belakang,
+                            identitas pengguna,
+                            reply_msg,
+                            event.id,
+                            msg.id)
+                    kecuali Pengecualian sebagai e:
+                        LOG.kesalahan(str(e))
+                        jika BOTLOG:
+                            tunggu event.client.send_message(
+                                BOTLOG_CHATID,
+                                f"**ERROR:** Saat menyimpan detail pesan di database\n`{e}`",
+                            )
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"buka kembali")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                tombol = paginate_help(0, dugmeler, "helpme")
+                teks = f"**✨ -ᴜsᴇʀʙᴏᴛ ✨**\n\n⍟ **ʙᴀsᴇ ᴏɴ :** {adB.name}\n⍟ **ᴅᴇᴘʟᴏʏ :** •[{HOSTED_ON}]•\n ⍟ **ᴏᴡɴᴇʀ** {user.first_name}\n⍟ **ᴊᴜᴍʟᴀʜ :** {len(dugmeler)} **Modul**"
+                menunggu acara.edit(
+                    teks,
+                    file = login,
+                    tombol = tombol,
+                    link_preview=Salah,
+                )
+            kalau tidak:
+                reply_pop_up_alert = f"Kamu tidak diizinkan, ini Userbot Milik {owner}"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(events.InlineQuery)
+        async def inline_handler(acara):
+            builder = event.builder
+            hasil = Tidak ada
+            kueri = event.text
+            if event.query.user_id == uid dan query.startswith(
+                    "@AyiinXdDukungan"):
+                tombol = paginate_help(0, dugmeler, "helpme")
+                hasil = menunggu event.builder.photo(
+                    file = login,
+                    link_preview=Salah,
+                    text=f"**✨ -ᴜsᴇʀʙᴏᴛ ɪɴʟɪɴᴇ ✨**\n\n⍟ **ʙᴀsᴇ ᴏɴ :** {adB.name}\n⍟ **ᴅᴇᴘʟᴏʏ :** •[{HOSTED_ON}]•\n ⍟ **ᴏᴡɴᴇʀ :** {user.first_name}\n⍟ **ᴊᴜᴍʟᴀʜ :** {len(dugmeler)} **Modul**",
+                    tombol=main_help_button,
+                )
+            elif query.startswith("repo"):
+                hasil = pembangun.artikel(
+                    judul="Repositori",
+                    description="Repositori Ayiin - Userbot",
+                    url="https://t.me/AyiinXdSupport",
+                    ibu jari=InputWebDocument(
+                        INLINE_PIC,
+                        0,
+                        "gambar/jpeg",
+                        []),
+                    text="**Ayiin-Userbot**\n➖➖➖➖➖➖➖➖➖➖\n✧ **ʀᴇᴘᴏ :** [AyiinXd](https://t.me/AyiinXd)\n✧ ** sᴜᴘᴘᴏʀᴛ :** @AyiinXdSupport\n✧ **ʀᴇᴘᴏsɪᴛᴏʀʏ :** [Ayiin-Userbot](https://github.com/AyiinXd/Ayiin-Userbot)\n➖➖➖➖➖➖➖➖➖➖",
+                    tombol=[
+                        [
+                            custom.Button.url(
+                                "ɢʀᴏᴜᴘ",
+                                "https://t.me/AyiinXdSupport"),
+                            custom.Button.url(
+                                "ʀᴇᴘᴏ",
+                                "https://github.com/AyiinXd/Ayiin-Userbot"),
+                        ],
+                    ],
+                    link_preview=Salah,
+                )
+            elif query.startswith("string"):
+                hasil = pembangun.artikel(
+                    judul = "Tali",
+                    description="String Ayiin - Userbot",
+                    url="https://t.me/AyiinXdSupport",
+                    ibu jari=InputWebDocument(
+                        logoyin,
+                        0,
+                        "gambar/jpeg",
+                        []),
+                    teks=get_string("lang_4"),
+                    tombol=[
+                        [
+                            custom.Button.url(
+                                "Bᴏᴛ S",
+                                url="https://t.me/AyiinStringRobot?start="),
+                            custom.Button.url(
+                                "S R",
+                                url="https://repl.it/@AyiinXd/AyiinString?lite=1&outputonly=1"),
+                        ],
+                        [
+                            custom.Button.url("Sᴜᴘᴘᴏʀᴛ", url="https://t.me/AyiinXdSupport"),
+                        ],
+                    ],
+                    link_preview=Salah,
+                )
+            elif query.startswith("lang"):
+                bahasa = get_languages()
+                text = "Daftar Bahasa yang Tersedia.",
+                tud = [
+                    Tombol.inline(
+                        f"{bahasa[yins]['asli']} [{yins.lower()}]",
+                        data=f"set_{yin}",
+                    )
+                    untuk yin dalam bahasa
+                ]
+                tombol = daftar(zip(tutud[::2], tutud[1::2]))
+                if len(tutud) % 2 == 1:
+                    button.append((tutud[-1],))
+                button.append([custom.Button.inline("ʙᴀᴄᴋ", data="yins_close")])
+                hasil = pembangun.artikel(
+                    judul = "Lang",
+                    description="Lang Ayiin - Userbot",
+                    url="https://t.me/AyiinXdSupport",
+                    ibu jari=InputWebDocument(
+                        logoyin,
+                        0,
+                        "gambar/jpeg",
+                        []),
+                    teks=get_string("lang_1"),
+                    tombol = tombol,
+                    link_preview=Salah,
+                )
+            elif query.startswith("Tombol sebaris"):
+                markdown_note = permintaan[14:]
+                sebelumnya = 0
+                catatan_data = ""
+                tombol = []
+                untuk kecocokan di BTN_URL_REGEX.finditer(markdown_note):
+                    n_escapes = 0
+                    to_check = match.start(1) - 1
+                    sementara to_check > 0 dan markdown_note[to_check] == "\\":
+                        n_escapes += 1
+                        untuk_memeriksa -= 1
+                    jika n_escapes % 2 == 0:
+                        tombol. tambahkan(
+                            (match.group(2), match.group(3), bool(
+                                match.group(4))))
+                        note_data += markdown_note[sebelumnya: match.start(1)]
+                        sebelumnya = pertandingan.end(1)
+                    elif n_escapes % 2 == 1:
+                        note_data += markdown_note[sebelumnya:untuk_memeriksa]
+                        prev = match.start(1) - 1
+                    kalau tidak:
+                        merusak
+                kalau tidak:
+                    note_data += markdown_note[sebelumnya:]
+                pesan_teks = catatan_data.strip()
+                tl_ib_buttons = ibuild_keyboard(tombol)
+                hasil = pembangun.artikel(
+                    judul="Pembuat sebaris",
+                    teks=pesan_teks,
+                    tombol=tl_ib_buttons,
+                    link_preview=Salah,
+                )
+            kalau tidak:
+                hasil = pembangun.artikel(
+                    judul="✨ -ᴜsᴇʀʙᴏᴛ ",
+                    description="Ayiin - Userbot | Telethon",
+                    url="https://t.me/AyiinSupport",
+                    ibu jari=InputWebDocument(
+                        INLINE_PIC,
+                        0,
+                        "gambar/jpeg",
+                        []),
+                    text=f"**Ayiin-Userbot**\n➖➖➖➖➖➖➖➖➖➖\n✧ **ᴏᴡɴᴇʀ :** [{user.first_name}](tg://user?id={user .id})\n✧ **ᴀssɪsᴛᴀɴᴛ:** {tgbotusername}\n➖➖➖➖➖➖➖➖➖➖\n**ᴜᴘᴅᴀᴛᴇs :** @AyiinSupport\n➖➖➖➖➖➖➖➖➖➖ ",
+                    tombol=[
+                        [
+                            custom.Button.url(
+                                "ɢʀᴏᴜᴘ",
+                                "https://t.me/AyiinXdSupport"),
+                            custom.Button.url(
+                                "ʀᴇᴘᴏ",
+                                "https://github.com/AyiinXd/Ayiin-Userbot"),
+                        ],
+                    ],
+                    link_preview=Salah,
+                )
+            menunggu acara.jawaban(
+                [hasil], switch_pm="👥 PORTAL USERBOT", switch_pm_param="mulai"
+            )
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery(
+                data=re.compile(rb"helpme_next\((.+?)\)")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                nomor_halaman_saat ini = int(
+                    event.data_match.group(1).decode("UTF-8"))
+                tombol = paginate_help(
+                    current_page_number + 1, dugmeler, "tolong saya")
+                tunggu event.edit(buttons=buttons)
+            kalau tidak:
+                reply_pop_up_alert = (
+                    f"Kamu Tidak diizinkan, ini Userbot Milik {owner}"
+                )
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"helpme_close\((.+?)\)")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS: # @Kyy-Userbot
+                # https://t.me/TelethonChat/115200
+                menunggu acara.edit(
+                    file = login,
+                    link_preview=Benar,
+                    tombol=main_help_button)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"gcback")
+            )
+        )
+        async def gback_handler(acara):
+            if event.query.user_id == uid atau event.query.user_id di SUDO_USERS: # @Ayiin-Userbot
+                # https://t.me/TelethonChat/115200
+                teks = (
+                    f"**✨ ᴀʏɪɪɴ-ᴜsᴇʀʙᴏᴛ ɪɴʟɪɴᴇ **\n\n✧ **ᴏᴡɴᴇʀ :** [{user.first_name}](tg://user?id={user.id})\n✧ * *ᴊᴜᴍʟᴀʜ :** {len(dugmeler)} **Modul**")
+                menunggu acara.edit(
+                    teks,
+                    file = login,
+                    link_preview=Benar,
+                    tombol=main_help_button)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"set_(.*)")
+            )
+        )
+        async def langs (acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                lang = event.data_match.group(1).decode("UTF-8")
+                bahasa[0] = lang
+                jika tidak gvarstatus("lang"):
+                    delgvar(bahasa[0])
+                    bahasa = get_languages()
+                jika bahasa:
+                    mencoba:
+                        addgvar("bahasa", lang)
+                        menunggu acara.edit(
+                            get_string("lang_2").format(
+                                bahasa[lang]['asli'], lang),
+                            file = login,
+                            link_preview=Benar,
+                            tombol=[Button.inline("ʙᴀᴄᴋ", data="yins_close")]
+                        )
+                    kecuali Pengecualian:
+                        lulus
+
+            kalau tidak:
+                reply_pop_up_alert = f"❌ DISCLAIMER \n\nAnda Tidak Memiliki Hak Untuk Menekan Tombol Button Ini"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(events.CallbackQuery(data=b"inline_yins"))
+        async def tentang (acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                tunggu event.edit(f"""
+•Menu• - Grup obrolan suara untuk [{user.first_name}](tg://user?id={user.id})
+""",
+                                 tombol=[
+                                     [
+                                         Button.inline("⍟ ",
+                                                       data="vcplugin"),
+                                         Button.inline("⍟ s ",
+                                                       data="vctools")],
+                                     [custom.Button.inline(
+                                         "ʙᴀᴄᴋ", data="gcback")],
+                                 ]
+                                 )
+            kalau tidak:
+                reply_pop_up_alert = f"❌ DISCLAIMER \n\nAnda Tidak Memiliki Hak Untuk Menekan Tombol Button Ini"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"vcplugin")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                teks = (
+                    f"""
+**Perintah yang tersedia di vcplugin**
+
+  » **Perintah : **`{cmd}play` <Judul Lagu/Link YT>
+  » **Kegunaan :** __Untuk Memutar Lagu di grup obrolan suara dengan akun kamu.__
+
+  » **Perintah : **`{cmd}vplay` <Judul Video/Link YT>
+  » **Kegunaan :** __Untuk Memutar Video di grup obrolan suara dengan akun kamu.__
+
+  » **Perintah : **`{cmd}end`
+  » **Kegunaan :** __Untuk Memberhentikan video/lagu yang sedang diputar di grup obrolan suara.__
+
+  » **Perintah : **`{cmd}skip`
+  » **Kegunaan :** __Untuk Melewati video/lagu yang sedang di putar.__
+
+  » **Perintah : **`{cmd}jeda`
+  » **Kegunaan :** __Untuk memberhentikan video/lagu yang sedang diputar.__
+
+  » **Perintah : **`{cmd}resume`
+  » **Kegunaan :** __Untuk melanjutkan pemutaran video/lagu yang sedang diputar.__
+
+  » **Perintah : **`{cmd}volume` 1-200
+  » **Kegunaan :** __Untuk mengubah volume (Membutuhkan Hak admin).__
+
+  » **Perintah : **`{cmd}daftar putar`
+  » **Kegunaan :** __Untuk menampilkan daftar putar Lagu/Video.__
+""")
+                menunggu acara.edit(
+                    teks,
+                    file = login,
+                    link_preview=Benar,
+                    tombol=[Button.inline("ʙᴀᴄᴋ", data="inline_yins")])
+            kalau tidak:
+                reply_pop_up_alert = f"❌ DISCLAIMER \n\nAnda Tidak Memiliki Hak Untuk Menekan Tombol Button Ini"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"vctools")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                teks = (
+                    f"""
+**Perintah yang tersedia di vctools**
+
+  » **Perintah : **`{cmd}startvc`
+  » **Kegunaan :** __Untuk Memulai grup obrolan suara.__
+
+  » **Perintah : **`{cmd}stopvc`
+  » **Kegunaan :** __Untuk Memberhentikan grup voice chat.__
+
+  » **Perintah :** `{cmd}joinvc` atau `{cmd}joinvc` <chatid/username gc>
+  » **Kegunaan :** __Untuk bergabung ke grup voice chat.__
+
+  » **Perintah : **`{cmd}leavevc` atau `{cmd}leavevc` <chatid/username gc>
+  » **Kegunaan :** __Untuk Turun dari grup obrolan suara.__
+
+  » **Perintah : **`{cmd}vctitle` <title vcg>
+  » **Kegunaan :** __Untuk Mengubah judul/judul voice chat grup.__
+
+  » **Perintah : **`{cmd}vcinvite`
+  » **Kegunaan :** __Mengundang Member group ke voice chat group.__
+""")
+                menunggu acara.edit(
+                    teks,
+                    file = login,
+                    link_preview=Benar,
+                    tombol=[Button.inline("ʙᴀᴄᴋ", data="inline_yins")])
+            kalau tidak:
+                reply_pop_up_alert = f"❌ DISCLAIMER \n\nAnda Tidak Memiliki Hak Untuk Menekan Tombol Button Ini"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(events.CallbackQuery(data=b"konten_yins"))
+        async def tentang (acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                tunggu event.edit(f"""
+•Menu• - Konten Channel untuk [{user.first_name}](tg://user?id={user.id})
+""",
+                                 tombol=[
+                                     [
+                                         Button.inline("⍟ ",
+                                                       data="btpmayiin"),
+                                         Button.inline("⍟ s ",
+                                                       data="yinsbokep")],
+                                     [custom.Button.inline(
+                                         "ʙᴀᴄᴋ", data="gcback")],
+                                 ]
+                                 )
+            kalau tidak:
+                reply_pop_up_alert = f"❌ DISCLAIMER \n\nAnda Tidak Memiliki Hak Untuk Menekan Tombol Button Ini"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"btpmayiin")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                teks = (
+                    f"""
+**Perintah Yang Tersedia Di btpm**
+
+  » **Perintah : **`{cmd}btpm` <nama pengguna ch>
+  » **Kegunaan :** __Untuk Mendapatkan Daftar Btpm Kosong.__
+
+  » **Perintah : **`{cmd}savebt` <nama_list>
+  » **Kegunaan :** __Untuk membuang List Btpm, Gunakan Nama Yang Berbeda.__
+
+  » **Perintah : **$<nama_list>
+  » **Kegunaan :** __Untuk Mendapatkan List Btpm Yang Tersimpan.__
+
+  » **Perintah : **`{cmd}delbt` <nama_list>
+  » **Kegunaan :** __Menghapus List Btpm Yang Tersimpan.__
+
+  » **Perintah : **`{cmd}listbt` <nama_list>
+  » **Kegunaan :** __Untuk Menlihat Semua Daftar Btpm Yang Tersimpan.__
+""")
+                menunggu acara.edit(
+                    teks,
+                    file = login,
+                    link_preview=Benar,
+                    tombol=[Button.inline("ʙᴀᴄᴋ", data="konten_yins")])
+            kalau tidak:
+                reply_pop_up_alert = f"❌ DISCLAIMER \n\nAnda Tidak Memiliki Hak Untuk Menekan Tombol Button Ini"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"yinsbokep")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                teks = (
+                    f"""
+✘ **Perintah yang tersedia di yins bokep**
+
+  » **Perintah : **`{cmd}bokp`
+  » **Kegunaan :** __Untuk Mengirim bokp secara acak.__
+""")
+                menunggu acara.edit(
+                    teks,
+                    file = login,
+                    link_preview=Benar,
+                    tombol=[Button.inline("ʙᴀᴄᴋ", data="konten_yins")])
+            kalau tidak:
+                reply_pop_up_alert = f"❌ DISCLAIMER \n\nAnda Tidak Memiliki Hak Untuk Menekan Tombol Button Ini"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"yins_langs")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                teks = (
+                    f"""
+**Perintah yang tersedia di tools**
+
+  » **Perintah :** `{cmd}lang`
+  » **Kegunaan : **Untuk Mengubah Bahasa.
+
+  » **Perintah :** `{cmd}string`
+  » **Kegunaan : **Untuk Membuat Sesi String.
+""")
+                menunggu acara.edit(
+                    teks,
+                    file = login,
+                    link_preview=Benar,
+                    tombol=[Button.inline("ʙᴀᴄᴋ", data="gcback")])
+            kalau tidak:
+                reply_pop_up_alert = f"❌ DISCLAIMER \n\nAnda Tidak Memiliki Hak Untuk Menekan Tombol Button Ini"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(events.CallbackQuery(data=b"close"))
+        async def tutup (acara):
+            tombol = [
+                (custom.Button.inline("ᴍᴀɪɴ ", data="gcback"),),
+            ]
+            menunggu event.edit("**ᴍᴇɴᴜ **", file=logoyins, keys=buttons)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery( # pylint:disable=E0602
+                data=re.compile(rb"yins_close")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                menunggu event.edit(get_string("lang_3"), file=logoyins)
+
+        @tgbot.on(
+            event.callbackquery.CallbackQuery(
+                data=re.compile(rb"helpme_prev\((.+?)\)")
+            )
+        )
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                nomor_halaman_saat ini = int(
+                    event.data_match.group(1).decode("UTF-8"))
+                tombol = paginate_help(
+                    current_page_number - 1, dugmeler, "tolong saya")
+                tunggu event.edit(buttons=buttons)
+            kalau tidak:
+                reply_pop_up_alert = f"Kamu tidak diizinkan, ini Userbot Milik {owner}"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+        @tgbot.on(events.callbackquery.CallbackQuery(data=re.compile(b"ub_modul_(.*)")))
+        async def on_plug_in_callback_query_handler(acara):
+            jika event.query.user_id == uid atau event.query.user_id di SUDO_USERS:
+                modul_name = event.data_match.group(1).decode("UTF-8")
+
+                cmdhel = str(CMD_HELP[nama_modul])
+                jika len(cmdhel) > 950:
+                    string_bantuan = (
+                        str(CMD_HELP[nama_modul])
+                        .ganti("`", "")
+                        .replace("**", "")[:950]
+                        + "..."
+                        + f"\n\nBaca Teks Berikutnya Ketik {cmd}help "
+                        + nama_modul
+                        + " "
+                    )
+                kalau tidak:
+                    help_string = (str(CMD_HELP[nama_modul]).ganti(
+                        "`", "").replace("**", ""))
+
+                reply_pop_up_alert = (
+                    help_string
+                    jika help_string bukan None
+                    else "{} Tidak ada dokumen yang telah ditulis untuk modul.".format(
+                        nama_modul
+                    )
+                )
+                menunggu acara.edit(
+                    reply_pop_up_alert, tombol=[
+                        Button.inline("ʙᴀᴄᴋ", data="buka kembali")]
+                )
+
+            kalau tidak:
+                reply_pop_up_alert = f"Kamu tidak diizinkan, ini Userbot Milik {owner}"
+                menunggu event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+    kecuali BaseException:
+        LOG.info(
+            f"KALO BOT LU NGECRASH, KLIK SAVE YANG DI POJOK KANAN BAWAH DAN KIRIM KE @AyiinXdSupport » TAG @admin » Info By: Ayiin-Userbot {BOT_VER}")
